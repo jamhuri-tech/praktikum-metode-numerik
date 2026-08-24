@@ -66,10 +66,18 @@ https://colab.research.google.com/github/jamhuri-tech/praktikum-metode-numerik/b
 
 ## Membuka di Kaggle
 
-1. Buka [kaggle.com/code](https://www.kaggle.com/code), lalu **New Notebook**
-2. **File → Import Notebook**, tempelkan alamat berkas `.ipynb` dari repositori ini
-3. Setelan **Accelerator** biarkan *None*: seluruh praktikum berukuran kecil
+Tidak sesederhana Colab: tidak ada satu alamat yang tinggal diklik, dan Anda
+harus sudah masuk ke akun Kaggle.
+
+1. Buka [kaggle.com](https://www.kaggle.com), lalu **Create → New Notebook**
+2. Di dalam penyunting, pilih **File → Open Notebook**
+3. Pada dialognya pilih sumber **GitHub**, masukkan alamat repositori ini, lalu
+   pilih berkas `.ipynb` yang diinginkan
+4. Setelan **Accelerator** biarkan *None*: seluruh praktikum berukuran kecil
    dan tidak memerlukan GPU
+
+Kalau menyulitkan, unduh saja berkas `.ipynb` dari repositori ini lalu
+unggah lewat dialog yang sama. Hasilnya sama.
 
 ## Bekerja di komputer sendiri
 
