@@ -1,0 +1,5 @@
+# Colab dan Kaggle sudah memuat keempatnya; berkas ini untuk yang bekerja
+# di komputer sendiri.
+numpy>=1.24
+scipy>=1.10
+matplotlib>=3.7

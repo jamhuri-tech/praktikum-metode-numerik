@@ -1,0 +1,18 @@
+# Lingkungan Python
+metnum/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Berkas kerja mahasiswa: repo ini hanya memuat kerangka
+p*_nama.py
+*_checkpoint.ipynb
+.ipynb_checkpoints/
+
+# Gambar hasil jalan
+*.png
+*.pdf
+
+# Sistem
+.DS_Store
