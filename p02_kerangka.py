@@ -6,6 +6,24 @@ kegiatan, jangan menunggu sampai seluruhnya selesai.
     python3 p02_kerangka.py
 """
 import numpy as np
+# >>> pemeriksa
+# Pemeriksa isian. Setiap kegiatan diakhiri pemeriksaan otomatis atas
+# TODO-nya. Ujinya memakai persoalan kecil yang berbeda dari tabel pada
+# modul, jadi lolosnya bukan karena angka tabel kebetulan sama. Kalau
+# tertulis BELUM, baca pesannya: pesan itu menyebut angka yang keluar dari
+# kode Anda dan angka yang seharusnya.
+def cek_todo(label, uji):
+    try:
+        ok, pesan = uji()
+    except Exception as e:
+        ok, pesan = False, f"galat saat dijalankan: {type(e).__name__}: {e}"
+    if ok:
+        print(f"  [BENAR] {label}")
+    else:
+        print(f"  [BELUM] {label}")
+        print(f"          {pesan}")
+    return ok
+pass  # <<< pemeriksa
 
 f  = lambda x: x**3 - 2*x - 5
 df = lambda x: 3*x**2 - 2
@@ -61,6 +79,26 @@ for k in range(8):
     n = abs(hn[k]-akar) if k < len(hn) else float('nan')
     s = abs(hs[k]-akar) if k < len(hs) else float('nan')
     print(f"{k:3d} {b:12.3e} {n:12.3e} {s:12.3e}")
+# >>> pemeriksa
+print()
+print("Periksa isian kegiatan ini:")
+def _uji_1a():
+    r, h = bagi_dua(lambda x: x*x - 2, 1.0, 2.0, tol=1e-10)
+    return abs(r - 2**0.5) < 1e-9, f"bagi_dua pada x^2 - 2 di [1, 2] memberi {r!r}, seharusnya dekat 1.41421356"
+def _uji_1b():
+    r, h = newton(lambda x: x*x - 2, lambda x: 2*x, 1.0)
+    if abs(r - 2**0.5) > 1e-12:
+        return False, f"newton pada x^2 - 2 dari 1 memberi {r!r}, seharusnya 1.4142135623730951"
+    return len(h) - 1 <= 6, f"akarnya benar tetapi butuh {len(h)-1} iterasi; Newton seharusnya paling banyak 6"
+def _uji_1c():
+    r, h = secant(lambda x: x*x - 2, 1.0, 2.0)
+    if abs(r - 2**0.5) > 1e-12:
+        return False, f"secant pada x^2 - 2 dari 1 dan 2 memberi {r!r}, seharusnya 1.4142135623730951"
+    return len(h) - 2 <= 9, f"akarnya benar tetapi butuh {len(h)-2} iterasi; secant seharusnya paling banyak 9"
+cek_todo("TODO 1a  bagi_dua", _uji_1a)
+cek_todo("TODO 1b  newton", _uji_1b)
+cek_todo("TODO 1c  secant", _uji_1c)
+pass  # <<< pemeriksa
 
 print()
 print("="*70); print("KEGIATAN 2  Mengukur orde konvergensi"); print("="*70)
@@ -77,6 +115,16 @@ print("Newton :", " ".join(f"{p:.3f}" for p in orde(hn)[:3]))
 # Taksiran pertama secant dilewati: galatnya sempat naik pada langkah
 # pertama, sehingga nisbahnya tidak bermakna.
 print("secant :", " ".join(f"{p:.3f}" for p in orde(hs)[1:4]))
+# >>> pemeriksa
+print()
+print("Periksa isian kegiatan ini:")
+def _uji_2a():
+    p = orde([akar + 1e-1, akar + 1e-2, akar + 1e-4, akar + 1e-8])
+    if not p or p[0] != p[0]:
+        return False, "orde() masih mengembalikan nan"
+    return abs(p[0] - 2) < 1e-6, f"galat 1e-1, 1e-2, 1e-4 seharusnya memberi orde 2, bukan {p[0]:.4f}"
+cek_todo("TODO 2a  orde", _uji_2a)
+pass  # <<< pemeriksa
 
 print()
 print("="*70); print("KEGIATAN 3  Ketika Newton kehilangan kekuadratikannya")

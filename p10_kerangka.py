@@ -6,6 +6,24 @@ kegiatan, jangan menunggu sampai seluruhnya selesai.
     python3 p10_kerangka.py
 """
 import numpy as np
+# >>> pemeriksa
+# Pemeriksa isian. Setiap kegiatan diakhiri pemeriksaan otomatis atas
+# TODO-nya. Ujinya memakai persoalan kecil yang berbeda dari tabel pada
+# modul, jadi lolosnya bukan karena angka tabel kebetulan sama. Kalau
+# tertulis BELUM, baca pesannya: pesan itu menyebut angka yang keluar dari
+# kode Anda dan angka yang seharusnya.
+def cek_todo(label, uji):
+    try:
+        ok, pesan = uji()
+    except Exception as e:
+        ok, pesan = False, f"galat saat dijalankan: {type(e).__name__}: {e}"
+    if ok:
+        print(f"  [BENAR] {label}")
+    else:
+        print(f"  [BELUM] {label}")
+        print(f"          {pesan}")
+    return ok
+pass  # <<< pemeriksa
 
 def euler(f, y0, t0, T, n):
     t = np.linspace(t0, T, n+1); h = (T-t0)/n
@@ -46,6 +64,18 @@ print("Biaya sama, mutu berbeda: RK4 memakai 4 evaluasi f tiap langkah.")
 for n in (10, 40):
     print(f"  Euler n={4*n:4d} ({4*n} eval) galat={abs(euler(f,y0,t0,T,4*n)[1][-1]-tepat(T)):.3e}")
     print(f"  RK4   n={n:4d} ({4*n} eval) galat={abs(rk4(f,y0,t0,T,n)[1][-1]-tepat(T)):.3e}")
+# >>> pemeriksa
+print()
+print("Periksa isian kegiatan ini:")
+def _uji_1a():
+    v = euler(lambda t, y: y, 1.0, 0.0, 1.0, 2)[1][-1]
+    return abs(v - 2.25) < 1e-14, f"Euler y' = y, dua langkah sampai t = 1 = {float(v)!r}, seharusnya 2.25"
+def _uji_1b():
+    v = rk4(lambda t, y: y, 1.0, 0.0, 1.0, 1)[1][-1]
+    return abs(v - 65/24) < 1e-14, f"RK4 y' = y, satu langkah sampai t = 1 = {float(v)!r}, seharusnya 2.708333333333333"
+cek_todo("TODO 1a  euler", _uji_1a)
+cek_todo("TODO 1b  rk4", _uji_1b)
+pass  # <<< pemeriksa
 
 print()
 print("="*70); print("KEGIATAN 2  Kekakuan"); print("="*70)
@@ -74,6 +104,15 @@ for n in (100, 500, 1400, 1500, 3000, 6000):
     print(f"{n:7d} {h:10.5f} {h*abs(lam):12.3f} {ge_s} {gi:17.3e}")
 print("\nSyarat kestabilan Euler eksplisit: h*|lambda| < 2, yaitu h < 0.002,")
 print(f"artinya n > {3.0/0.002:.0f}. Cocokkan dengan tabel.")
+# >>> pemeriksa
+print()
+print("Periksa isian kegiatan ini:")
+def _uji_2b():
+    t2, y2 = euler_implisit(1.0, 0.0, 3.0, 100)
+    g2 = np.max(np.abs(y2 - np.cos(t2)))
+    return g2 < 1e-4, f"Euler implisit n = 100 bergalat {g2:.3e}, seharusnya berorde 1e-5"
+cek_todo("TODO 2b  euler_implisit", _uji_2b)
+pass  # <<< pemeriksa
 
 print()
 print("="*70); print("KEGIATAN 3  Langkah adaptif"); print("="*70)
@@ -106,3 +145,17 @@ n_seragam = len(hs)
 _, yu = rk4(f2, 1.0, 0.0, 5.0, n_seragam)
 print(f"RK4 seragam {n_seragam} langkah, galat akhir = "
       f"{abs(yu[-1]-tepat2(5.0)):.3e}")
+# >>> pemeriksa
+print()
+print("Periksa isian kegiatan ini:")
+# Taksiran galat yang dibiarkan nol membuat setiap langkah diterima dan
+# langkahnya terus membesar. Hasilnya berakhir cepat dengan galat besar.
+def _uji_3a():
+    if abs(rk4(lambda t, y: y, 1.0, 0.0, 1.0, 1)[1][-1] - 65/24) > 1e-14:
+        return False, "isi TODO 1b lebih dahulu; langkah adaptif dibangun di atas rk4"
+    g3 = np.max(np.abs(ys - tepat2(ts)))
+    if g3 > 1e-6:
+        return False, f"langkah adaptif bergalat {g3:.3e} dengan {len(hs)} langkah; seharusnya berorde 1e-9 dengan sekitar 39 langkah"
+    return 20 <= len(hs) <= 80, f"galatnya kecil tetapi memakai {len(hs)} langkah, seharusnya sekitar 39"
+cek_todo("TODO 3a  taksiran galat", _uji_3a)
+pass  # <<< pemeriksa

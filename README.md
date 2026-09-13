@@ -106,6 +106,38 @@ Angka yang benar untuk setiap kegiatan tercetak pada modul, di bagian
 **"Yang seharusnya Anda lihat"**. Seluruh angka itu keluaran sungguhan, bukan
 taksiran, jadi Anda dapat memeriksa diri sendiri tanpa menunggu asisten.
 
+### Pemeriksa isian
+
+Setiap kegiatan diakhiri pemeriksaan otomatis atas `TODO`-nya. Sesudah tabel
+kegiatan tercetak, muncul baris seperti ini:
+
+```
+Periksa isian kegiatan ini:
+  [BENAR] TODO 1a  selisih terbagi
+  [BELUM] TODO 1b  skema Horner
+          polinomial 1 + 2x + x(x-1) di x = 3 dihitung [1.0], seharusnya 13
+```
+
+- **`[BENAR]`** berarti isian itu lolos uji.
+- **`[BELUM]`** berarti belum. Baris di bawahnya menyebut angka yang keluar
+  dari kode Anda dan angka yang seharusnya. Selama `TODO` belum diisi,
+  seluruhnya tertulis `[BELUM]`, dan itu wajar.
+- **`[SENDIRI]`** hanya ada pada Praktikum 1 dan tidak diperiksa otomatis.
+  Cocokkan sendiri hasilnya dengan petunjuk pada barisnya.
+
+Ujinya memakai persoalan kecil yang berbeda dari tabel pada modul, jadi tidak
+dapat diloloskan dengan menyalin angka tabel. Sebagian `TODO` bergantung pada
+`TODO` sebelumnya; kalau pesannya meminta mengisi yang lain lebih dahulu,
+kerjakan yang itu.
+
+`[BENAR]` hanya memastikan kodenya menghitung dengan benar. Pertanyaan pada
+setiap kegiatan tetap harus Anda jawab sendiri.
+
+Jangan mengubah bagian pemeriksa: yang diapit `# >>> pemeriksa` dan
+`# <<< pemeriksa`, serta baris yang diakhiri `# pemeriksa`. Pada notebook,
+jalankan sel berurutan dari atas, sebab pemeriksa memakai peubah dari sel
+kegiatannya.
+
 ### Dua jebakan khas notebook
 
 **Menjalankan sel tidak berurutan.** Notebook mengingat peubah dari sel mana

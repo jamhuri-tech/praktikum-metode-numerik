@@ -6,23 +6,28 @@ kegiatan, jangan menunggu sampai seluruhnya selesai.
     python3 p12_kerangka.py
 """
 import numpy as np
+# >>> pemeriksa
+# Pemeriksa isian. Setiap kegiatan diakhiri pemeriksaan otomatis atas
+# TODO-nya. Ujinya memakai persoalan kecil yang berbeda dari tabel pada
+# modul, jadi lolosnya bukan karena angka tabel kebetulan sama. Kalau
+# tertulis BELUM, baca pesannya: pesan itu menyebut angka yang keluar dari
+# kode Anda dan angka yang seharusnya.
+def cek_todo(label, uji):
+    try:
+        ok, pesan = uji()
+    except Exception as e:
+        ok, pesan = False, f"galat saat dijalankan: {type(e).__name__}: {e}"
+    if ok:
+        print(f"  [BENAR] {label}")
+    else:
+        print(f"  [BELUM] {label}")
+        print(f"          {pesan}")
+    return ok
+pass  # <<< pemeriksa
 
 print("="*74); print("KEGIATAN 1  Persamaan panas, skema eksplisit dan bilangan r")
 print("="*74)
 # u_t = u_xx pada (0,1), u(0)=u(1)=0, u(x,0)=sin(pi x) -> u = e^{-pi^2 t} sin(pi x)
-def panas_eksplisit(n, r, T=0.05):
-    h = 1.0/(n+1); dt = r*h*h
-    m = int(round(T/dt)); dt = T/m
-    r = dt/h**2
-    x = np.linspace(0, 1, n+2)[1:-1]
-    u = np.sin(np.pi*x)
-    for k in range(m):
-        u = u + r*(np.roll(u, 1) - 2*u + np.roll(u, -1))
-        u[0] = u[0] + 0.0   # batas nol: roll sudah salah di ujung, betulkan
-        u_kiri = np.concatenate(([0.0], u[:-1]))
-        u_kanan = np.concatenate((u[1:], [0.0]))
-    return x, u
-
 def panas_eksplisit_benar(n, r_minta, T=0.05):
     h = 1.0/(n+1); dt = r_minta*h*h
     m = max(int(round(T/dt)), 1); dt = T/m; r = dt/h**2
@@ -59,6 +64,20 @@ for rm in (0.10, 0.25, 0.49, 0.50, 0.51, 0.60, 2.00):
     ge_s = f"{ge:18.3e}" if np.isfinite(ge) and ge < 1e10 else f"{'MELEDAK':>18}"
     print(f"{rm:10.2f} {r:10.4f} {m:8d} {ge_s} {gi:17.3e}")
 print("\nSyarat kestabilan von Neumann untuk skema eksplisit: r <= 1/2.")
+# >>> pemeriksa
+print()
+print("Periksa isian kegiatan ini:")
+def _uji_1a():
+    x, u, r, m = panas_eksplisit_benar(9, 0.4, 0.01)
+    g = np.max(np.abs(u - tepat(x, 0.01)))
+    return g < 5e-3, f"skema eksplisit n = 9, T = 0.01 bergalat {g:.3e}, seharusnya berorde 1e-3"
+def _uji_1b():
+    x, u, r, m = panas_implisit(9, 0.4, 0.01)
+    g = np.max(np.abs(u - tepat(x, 0.01)))
+    return g < 5e-3, f"skema implisit n = 9, T = 0.01 bergalat {g:.3e}, seharusnya berorde 3e-3"
+cek_todo("TODO 1a  stensil tiga titik", _uji_1a)
+cek_todo("TODO 1b  matriks implisit", _uji_1b)
+pass  # <<< pemeriksa
 
 print()
 print("="*74); print("KEGIATAN 2  Orde kekonvergenan skema implisit"); print("="*74)
@@ -113,3 +132,20 @@ for Cm in (0.25, 0.50, 0.90, 1.00):
     x, u, u0, C, m = adveksi_upwind(200, Cm, "sinus")
     print(f"{C:8.4f} {np.max(np.abs(u)):32.4f} {np.max(np.abs(u-u0)):14.3e}")
 print("Nilai yang benar 1.0000. Makin kecil C, makin banyak yang hilang.")
+# >>> pemeriksa
+print()
+print("Periksa isian kegiatan ini:")
+# Upwind yang belum diisi membiarkan gelombangnya diam, dan sesudah satu
+# putaran penuh gelombang yang diam kebetulan tepat berada di tempat
+# semula. Yang membedakan redamannya: upwind yang benar pada C = 0.5
+# menyusutkan puncaknya.
+def _uji_3a():
+    x, u, u0, C, m = adveksi_upwind(50, 0.5, "sinus")
+    puncak = float(np.max(np.abs(u)))
+    if not np.isfinite(puncak) or puncak > 1.0 + 1e-9:
+        return False, "gelombangnya membesar pada C = 0.5, padahal syarat CFL terpenuhi; periksa arah selisihnya"
+    if puncak > 0.95:
+        return False, f"puncak sesudah satu putaran pada C = 0.5 = {puncak:.4f}, seharusnya sekitar 0.8191; gelombangnya belum bergerak"
+    return puncak > 0.5, f"puncak sesudah satu putaran pada C = 0.5 = {puncak:.4f}, seharusnya sekitar 0.8191; redamannya terlalu besar"
+cek_todo("TODO 3a  skema upwind", _uji_3a)
+pass  # <<< pemeriksa

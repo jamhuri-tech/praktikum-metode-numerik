@@ -6,6 +6,24 @@ kegiatan, jangan menunggu sampai seluruhnya selesai.
     python3 p03_kerangka.py
 """
 import numpy as np
+# >>> pemeriksa
+# Pemeriksa isian. Setiap kegiatan diakhiri pemeriksaan otomatis atas
+# TODO-nya. Ujinya memakai persoalan kecil yang berbeda dari tabel pada
+# modul, jadi lolosnya bukan karena angka tabel kebetulan sama. Kalau
+# tertulis BELUM, baca pesannya: pesan itu menyebut angka yang keluar dari
+# kode Anda dan angka yang seharusnya.
+def cek_todo(label, uji):
+    try:
+        ok, pesan = uji()
+    except Exception as e:
+        ok, pesan = False, f"galat saat dijalankan: {type(e).__name__}: {e}"
+    if ok:
+        print(f"  [BENAR] {label}")
+    else:
+        print(f"  [BELUM] {label}")
+        print(f"          {pesan}")
+    return ok
+pass  # <<< pemeriksa
 np.set_printoptions(precision=6, suppress=False, linewidth=100)
 
 def gauss_pivot(A, b):
@@ -50,6 +68,19 @@ print("A =", A.tolist(), " b =", b.tolist())
 print("tanpa pivoting ->", gauss_tanpa_pivot(A, b))
 print("dengan pivoting->", gauss_pivot(A, b))
 print("numpy solve    ->", np.linalg.solve(A, b))
+# >>> pemeriksa
+print()
+print("Periksa isian kegiatan ini:")
+def _uji_1ac():
+    A3 = np.array([[2.0, 1.0, 1.0], [4.0, -6.0, 0.0], [-2.0, 7.0, 2.0]])
+    x = gauss_tanpa_pivot(A3, np.array([5.0, -2.0, 9.0]))
+    return np.allclose(x, [1.0, 1.0, 2.0], rtol=0, atol=1e-12), f"gauss_tanpa_pivot memberi {np.round(x, 6).tolist()}, seharusnya [1, 1, 2]"
+def _uji_1b():
+    x = gauss_pivot(np.array([[1e-18, 1.0], [1.0, 1.0]]), np.array([1.0, 2.0]))
+    return np.allclose(x, [1.0, 1.0], rtol=0, atol=1e-12), f"gauss_pivot pada pivot 1e-18 memberi {x.tolist()}, seharusnya [1, 1]; baris belum ditukar"
+cek_todo("TODO 1a dan 1c  gauss_tanpa_pivot", _uji_1ac)
+cek_todo("TODO 1b  gauss_pivot", _uji_1b)
+pass  # <<< pemeriksa
 
 print()
 print("=" * 70)
@@ -67,6 +98,24 @@ for n in range(2, 13):
     galat = 0.0
     sisa = 0.0
     print(f"{n:3d} {kond:12.3e} {galat:15.3e} {sisa:14.3e}")
+    if n == 6: _hilbert6 = (H.copy(), kond, galat, sisa)  # pemeriksa
+# >>> pemeriksa
+print()
+print("Periksa isian kegiatan ini:")
+def _uji_2a():
+    H6 = _hilbert6[0]
+    ok = H6.shape == (6, 6) and H6[0, 0] == 1.0 and H6[2, 3] == 1/6 and H6[5, 5] == 1/11
+    return ok, f"untuk n = 6, H[0,0] = {H6[0,0]}, H[2,3] = {H6[2,3]}, seharusnya 1 dan 1/6"
+def _uji_2b():
+    _, kd, gl, ss = _hilbert6
+    if not 1.4e7 < kd < 1.6e7:
+        return False, f"kond(H) untuk n = 6 = {kd:.3e}, seharusnya sekitar 1.495e+07"
+    if not 1e-14 < gl < 1e-7:
+        return False, f"galat relatif untuk n = 6 = {gl:.3e}, seharusnya berorde 1e-10"
+    return 0.0 <= ss < 1e-12, f"sisa relatif untuk n = 6 = {ss:.3e}, seharusnya berorde 1e-16"
+cek_todo("TODO 2a  matriks Hilbert", _uji_2a)
+cek_todo("TODO 2b  kondisi, galat, sisa", _uji_2b)
+pass  # <<< pemeriksa
 
 print()
 print("=" * 70)
@@ -78,19 +127,34 @@ A = rng.standard_normal((n, n)) + n*np.eye(n)
 import time
 B = rng.standard_normal((n, 20))
 
-t0 = time.perf_counter()
-# TODO 3a: dua puluh penyelesaian terpisah.
-X1 = np.zeros_like(B)
-t_solve = time.perf_counter() - t0
-
 from scipy.linalg import lu_factor, lu_solve
-t0 = time.perf_counter()
-# TODO 3b: satu faktorisasi, lalu dua puluh substitusi.
-lu, piv = lu_factor(A)
-X2 = np.zeros_like(B)
-t_lu = time.perf_counter() - t0
+# Panggilan pertama selalu lebih lambat karena pustaka baru dimuat dan
+# memori baru disiapkan. Karena itu setiap cara diulang lima kali dan
+# yang dicatat waktu tercepatnya.
+t_solve = t_lu = float("inf")
+for ulang in range(5):
+    t0 = time.perf_counter()
+    # TODO 3a: dua puluh penyelesaian terpisah.
+    X1 = np.zeros_like(B)
+    t_solve = min(t_solve, time.perf_counter() - t0)
+
+    t0 = time.perf_counter()
+    # TODO 3b: satu faktorisasi, lalu dua puluh substitusi.
+    lu, piv = lu_factor(A)
+    X2 = np.zeros_like(B)
+    t_lu = min(t_lu, time.perf_counter() - t0)
 
 print(f"20 solve terpisah      : {t_solve*1000:8.1f} ms")
 print(f"1 faktorisasi + 20 subs: {t_lu*1000:8.1f} ms")
 print(f"nisbah                 : {t_solve/t_lu:8.2f} kali")
 print(f"selisih hasil          : {np.max(np.abs(X1-X2)):.3e}")
+# >>> pemeriksa
+print()
+print("Periksa isian kegiatan ini:")
+def _uji_3a():
+    return np.allclose(A @ X1, B, atol=1e-8), "A @ X1 belum sama dengan B"
+def _uji_3b():
+    return np.allclose(A @ X2, B, atol=1e-8), "A @ X2 belum sama dengan B"
+cek_todo("TODO 3a  dua puluh solve", _uji_3a)
+cek_todo("TODO 3b  satu faktorisasi", _uji_3b)
+pass  # <<< pemeriksa
